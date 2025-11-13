@@ -71,7 +71,13 @@ ${HIDDEN_MARKER_END}
   return jiraDetailsMessage + oldBody;
 };
 
-export const buildPRDescription = (details: JIRADetails) => {
+export const buildPRDescription = (details: JIRADetails, skipTitle: boolean = false) => {
+  // If skipTitle is true, return only the plain link
+  if (skipTitle) {
+    return details.url;
+  }
+
+  // Otherwise, return the formatted table with all details
   const displayKey = details.key.toUpperCase();
   return `<table><tbody><tr><td>
   <a href="${details.url}" title="${displayKey}" target="_blank"><img alt="${details.type.name}" src="${details.type.icon}" /> ${displayKey}</a>

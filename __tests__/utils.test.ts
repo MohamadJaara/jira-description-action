@@ -112,28 +112,89 @@ this is text below the markers`;
     const description = getPRDescription(oldPRDescription, issueInfo);
     expect(description).toEqual(oldPRDescription);
   });
+
+  it('should work with plain link when skip-ticket-title is enabled', () => {
+    const oldPRBody = 'old PR description body';
+    const plainLink = 'https://example.com/browse/ABC-123';
+    const description = getPRDescription(oldPRBody, plainLink);
+
+    expect(description).toEqual(`${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_START}
+${plainLink}
+${HIDDEN_MARKER_END}
+${oldPRBody}`);
+  });
+
+  it('should replace HTML table with plain link when updating from formatted to skip mode', () => {
+    const oldPRBodyInformation = 'old PR description body';
+    const oldFormattedTable = '<table><tbody><tr><td>formatted content</td></tr></tbody></table>';
+    const oldPRBody = `${HIDDEN_MARKER_START}${oldFormattedTable}${HIDDEN_MARKER_END}${oldPRBodyInformation}`;
+    const plainLink = 'https://example.com/browse/ABC-123';
+
+    const description = getPRDescription(oldPRBody, plainLink);
+
+    expect(description).toEqual(`${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_START}
+${plainLink}
+${HIDDEN_MARKER_END}
+${oldPRBodyInformation}`);
+    expect(description).not.toContain('<table>');
+    expect(description).not.toContain('formatted content');
+  });
 });
 
 describe('buildPRDescription()', () => {
-  it('should return description HTML from the JIRA details', () => {
-    const details: JIRADetails = {
-      key: 'ABC-123',
-      summary: 'Sample summary',
-      url: 'example.com/ABC-123',
-      type: {
-        name: 'story',
-        icon: 'icon.png',
-      },
-      project: {
-        name: 'name',
-        url: 'url',
-        key: 'key',
-      },
-    };
+  const details: JIRADetails = {
+    key: 'ABC-123',
+    summary: 'Sample summary',
+    url: 'example.com/ABC-123',
+    type: {
+      name: 'story',
+      icon: 'icon.png',
+    },
+    project: {
+      name: 'name',
+      url: 'url',
+      key: 'key',
+    },
+  };
 
+  it('should return description HTML from the JIRA details', () => {
     expect(buildPRDescription(details)).toEqual(`<table><tbody><tr><td>
   <a href="example.com/ABC-123" title="ABC-123" target="_blank"><img alt="story" src="icon.png" /> ABC-123</a>
   Sample summary
 </td></tr></tbody></table>`);
+  });
+
+  it('should return description HTML when skipTitle is false', () => {
+    expect(buildPRDescription(details, false)).toEqual(`<table><tbody><tr><td>
+  <a href="example.com/ABC-123" title="ABC-123" target="_blank"><img alt="story" src="icon.png" /> ABC-123</a>
+  Sample summary
+</td></tr></tbody></table>`);
+  });
+
+  it('should return only the URL when skipTitle is true', () => {
+    expect(buildPRDescription(details, true)).toEqual('example.com/ABC-123');
+  });
+
+  it('should return plain link without formatted table when skipTitle is enabled', () => {
+    const result = buildPRDescription(details, true);
+
+    // Should not contain HTML table elements
+    expect(result).not.toContain('<table>');
+    expect(result).not.toContain('<tbody>');
+    expect(result).not.toContain('<tr>');
+    expect(result).not.toContain('<td>');
+    expect(result).not.toContain('<a');
+    expect(result).not.toContain('<img');
+
+    // Should not contain summary
+    expect(result).not.toContain('Sample summary');
+
+    // Should only be the URL (plain string, no formatting)
+    expect(result).toBe('example.com/ABC-123');
+
+    // Verify it's a simple string with no HTML
+    expect(result).toMatch(/^[^<>]+$/);
   });
 });

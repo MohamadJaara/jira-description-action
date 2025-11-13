@@ -25,9 +25,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           jira-token: ${{ secrets.JIRA_TOKEN }}
           jira-base-url: https://your-domain.atlassian.net
-          skip-branches: '^(production-release|main|master|release\/v\d+)$' #optional 
+          skip-branches: '^(production-release|main|master|release\/v\d+)$' #optional
           custom-issue-number-regexp: '^\d+' #optional
-          jira-project-key: 'PRJ' #optional    
+          jira-project-key: 'PRJ' #optional
+          skip-ticket-title: false #optional    
 ```
 `
 
@@ -43,6 +44,7 @@ jobs:
 | `jira-project-key`     | Key of project in jira. First part of issue key | false    | none     |
 | `custom-issue-number-regexp` | Custom regexp to extract issue number from branch name. If not specified, default regexp would be used.  | false    | none     |
 | `fail-when-jira-issue-not-found` | Should action fail if jira issue is not found in jira  | false    | false     |
+| `skip-ticket-title` | Skip adding ticket title and formatted table, only add plain link to PR description  | false    | false     |
 
 ## Outputs
 
@@ -60,6 +62,7 @@ Tokens are private, so it's suggested adding them as [GitHub secrets](https://he
 * [Searching in branch name/PR title](#searching-in-branch-namepr-title)
 * [Using custom regex](#using-custom-regex)
 * [Custom label placement](#custom-label-placement)
+* [Skip ticket title](#skip-ticket-title)
 
 ### `jira-token`
 
@@ -127,4 +130,29 @@ Label would be inserted between these marker lines:
 <!--jira-description-action-hidden-marker-start-->
 
 <!--jira-description-action-hidden-marker-end-->
+```
+
+### Skip ticket title
+
+By default, the action adds a formatted table with the ticket title, type, and link to the PR description. If you prefer a plain link instead, set `skip-ticket-title: true`:
+
+```yml
+- uses: cakeinpanic/jira-description-action@master
+  with:
+    skip-ticket-title: true
+```
+
+**Default behavior (skip-ticket-title: false):**
+```html
+<table><tbody><tr><td>
+  <a href="https://your-domain.atlassian.net/browse/PRJ-123">
+    <img alt="Story" src="icon.png" /> PRJ-123
+  </a>
+  Add user authentication
+</td></tr></tbody></table>
+```
+
+**With skip-ticket-title: true:**
+```
+https://your-domain.atlassian.net/browse/PRJ-123
 ```

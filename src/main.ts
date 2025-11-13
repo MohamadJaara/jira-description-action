@@ -6,7 +6,7 @@ import { GithubConnector } from './github-connector';
 import { JiraConnector } from './jira-connector';
 
 async function run(): Promise<void> {
-  const { FAIL_WHEN_JIRA_ISSUE_NOT_FOUND } = getInputs();
+  const { FAIL_WHEN_JIRA_ISSUE_NOT_FOUND, SKIP_TICKET_TITLE } = getInputs();
 
   try {
     const { BRANCH_IGNORE_PATTERN } = getInputs();
@@ -28,7 +28,7 @@ async function run(): Promise<void> {
     const { key, source } = githubConnector.getIssueKeyFromTitle();
 
     const details = await jiraConnector.getTicketDetails(key);
-    await githubConnector.updatePrDetails(details);
+    await githubConnector.updatePrDetails(details, SKIP_TICKET_TITLE);
 
     setOutputs(key, source);
   } catch (error) {

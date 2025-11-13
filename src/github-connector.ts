@@ -73,7 +73,7 @@ export class GithubConnector {
       : getJIRAIssueKeyByDefaultRegexp(stringToParse);
   }
 
-  async updatePrDetails(details: JIRADetails) {
+  async updatePrDetails(details: JIRADetails, skipTitle: boolean = false) {
     const owner = this.githubData.owner;
     const repo = this.githubData.repository.name;
     console.log('Updating PR details');
@@ -84,7 +84,7 @@ export class GithubConnector {
       owner,
       repo,
       pull_number: prNumber,
-      body: getPRDescription(recentBody, buildPRDescription(details)),
+      body: getPRDescription(recentBody, buildPRDescription(details, skipTitle)),
     };
 
     return await this.octokit.rest.pulls.update(prData);
