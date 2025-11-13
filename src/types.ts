@@ -100,6 +100,7 @@ export interface IActionInputs {
   JIRA_PROJECT_KEY: string;
   CUSTOM_ISSUE_NUMBER_REGEXP: string;
   FAIL_WHEN_JIRA_ISSUE_NOT_FOUND: boolean;
+  SKIP_TICKET_TITLE: boolean;
 }
 
 export interface IGithubData {
