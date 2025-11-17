@@ -89,6 +89,10 @@ export interface JIRADetails {
     url: string;
     key: string;
   };
+  fixVersions?: Array<{
+    name: string;
+    id: string;
+  }>;
 }
 
 export interface IActionInputs {
@@ -101,6 +105,8 @@ export interface IActionInputs {
   CUSTOM_ISSUE_NUMBER_REGEXP: string;
   FAIL_WHEN_JIRA_ISSUE_NOT_FOUND: boolean;
   SKIP_TICKET_TITLE: boolean;
+  COMPARE_FIX_VERSION: string;
+  FIX_VERSION_REGEX: string;
 }
 
 export interface IGithubData {

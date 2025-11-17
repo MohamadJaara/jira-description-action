@@ -103,6 +103,21 @@ export class GithubConnector {
       });
   }
 
+  async addPRComment(message: string): Promise<void> {
+    const owner = this.githubData.owner;
+    const repo = this.githubData.repository.name;
+    const prNumber = this.githubData.pullRequest.number;
+
+    console.log('Adding comment to PR');
+
+    await this.octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body: message,
+    });
+  }
+
   private getGithubData(): IGithubData {
     const {
       eventName,

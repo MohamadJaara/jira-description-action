@@ -28,7 +28,7 @@ export class JiraConnector {
     try {
       const issue: JIRA.Issue = await this.getIssue(key);
       const {
-        fields: { issuetype: type, project, summary },
+        fields: { issuetype: type, project, summary, fixVersions },
       } = issue;
 
       return {
@@ -44,6 +44,7 @@ export class JiraConnector {
           url: `${this.JIRA_BASE_URL}/browse/${project.key}`,
           key: project.key,
         },
+        fixVersions: fixVersions as Array<{ name: string; id: string }> | undefined,
       };
     } catch (error) {
       console.log(
@@ -57,7 +58,7 @@ export class JiraConnector {
   }
 
   async getIssue(id: string): Promise<JIRA.Issue> {
-    const url = `/issue/${id}?fields=project,summary,issuetype`;
+    const url = `/issue/${id}?fields=project,summary,issuetype,fixVersions`;
     const response = await this.client.get<JIRA.Issue>(url);
     return response.data;
   }

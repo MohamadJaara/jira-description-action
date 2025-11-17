@@ -28,9 +28,10 @@ jobs:
           skip-branches: '^(production-release|main|master|release\/v\d+)$' #optional
           custom-issue-number-regexp: '^\d+' #optional
           jira-project-key: 'PRJ' #optional
-          skip-ticket-title: false #optional    
+          skip-ticket-title: false #optional
+          compare-fix-version: '4.17.0' #optional
+          fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)' #optional
 ```
-`
 
 ## Options
 
@@ -45,6 +46,8 @@ jobs:
 | `custom-issue-number-regexp` | Custom regexp to extract issue number from branch name. If not specified, default regexp would be used.  | false    | none     |
 | `fail-when-jira-issue-not-found` | Should action fail if jira issue is not found in jira  | false    | false     |
 | `skip-ticket-title` | Skip adding ticket title and formatted table, only add plain link to PR description  | false    | false     |
+| `compare-fix-version` | Version from the repository to compare with the JIRA ticket fix version (e.g., "4.17.0"). If provided, the action will fail if versions do not match. See [Version Comparison](#version-comparison) for details.  | false    | none     |
+| `fix-version-regex` | Optional regex pattern to extract version from JIRA fix version field. If not provided, versions are compared as-is (exact match). See [Version Comparison](#version-comparison) for details.  | false    | none     |
 
 ## Outputs
 
@@ -63,6 +66,7 @@ Tokens are private, so it's suggested adding them as [GitHub secrets](https://he
 * [Using custom regex](#using-custom-regex)
 * [Custom label placement](#custom-label-placement)
 * [Skip ticket title](#skip-ticket-title)
+* [Version Comparison](#version-comparison)
 
 ### `jira-token`
 
@@ -155,4 +159,27 @@ By default, the action adds a formatted table with the ticket title, type, and l
 **With skip-ticket-title: true:**
 ```
 https://your-domain.atlassian.net/browse/PRJ-123
+```
+
+### Version Comparison
+
+Verify that the JIRA ticket's fix version matches your repository version. The action fails if versions don't match.
+
+```yml
+compare-fix-version: '4.17.0'  # Exact match: JIRA must be exactly "4.17.0"
+```
+
+**For prefixed versions** (e.g., JIRA has "android 4.17.0"), use regex to extract the version:
+
+```yml
+compare-fix-version: '4.17.0'
+fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)'  # Extracts version from prefix
+```
+
+**Example:** Compare against package.json version
+```yml
+- uses: cakeinpanic/jira-description-action@master
+  with:
+    compare-fix-version: ${{ steps.version.outputs.version }}
+    fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)'
 ```
