@@ -28,9 +28,10 @@ jobs:
           skip-branches: '^(production-release|main|master|release\/v\d+)$' #optional
           custom-issue-number-regexp: '^\d+' #optional
           jira-project-key: 'PRJ' #optional
-          skip-ticket-title: false #optional    
+          skip-ticket-title: false #optional
+          compare-fix-version: '4.17.0' #optional
+          fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)' #optional
 ```
-`
 
 ## Options
 
@@ -45,6 +46,8 @@ jobs:
 | `custom-issue-number-regexp` | Custom regexp to extract issue number from branch name. If not specified, default regexp would be used.  | false    | none     |
 | `fail-when-jira-issue-not-found` | Should action fail if jira issue is not found in jira  | false    | false     |
 | `skip-ticket-title` | Skip adding ticket title and formatted table, only add plain link to PR description  | false    | false     |
+| `compare-fix-version` | Version from the repository to compare with the JIRA ticket fix version (e.g., "4.17.0"). If provided, the action will fail if versions do not match. See [Version Comparison](#version-comparison) for details.  | false    | none     |
+| `fix-version-regex` | Optional regex pattern to extract version from JIRA fix version field. If not provided, versions are compared as-is (exact match). See [Version Comparison](#version-comparison) for details.  | false    | none     |
 
 ## Outputs
 
@@ -63,6 +66,7 @@ Tokens are private, so it's suggested adding them as [GitHub secrets](https://he
 * [Using custom regex](#using-custom-regex)
 * [Custom label placement](#custom-label-placement)
 * [Skip ticket title](#skip-ticket-title)
+* [Version Comparison](#version-comparison)
 
 ### `jira-token`
 
@@ -131,3 +135,149 @@ Label would be inserted between these marker lines:
 
 <!--jira-description-action-hidden-marker-end-->
 ```
+
+### Skip ticket title
+
+By default, the action adds a formatted table with the ticket title, type, and link to the PR description. If you prefer a plain link instead, set `skip-ticket-title: true`:
+
+```yml
+- uses: cakeinpanic/jira-description-action@master
+  with:
+    skip-ticket-title: true
+```
+
+**Default behavior (skip-ticket-title: false):**
+```html
+<table><tbody><tr><td>
+  <a href="https://your-domain.atlassian.net/browse/PRJ-123">
+    <img alt="Story" src="icon.png" /> PRJ-123
+  </a>
+  Add user authentication
+</td></tr></tbody></table>
+```
+
+**With skip-ticket-title: true:**
+```
+https://your-domain.atlassian.net/browse/PRJ-123
+```
+
+### Version Comparison
+
+You can automatically verify that the JIRA ticket's fix version matches your repository version. This ensures that PRs are targeting the correct release version.
+
+#### Basic Usage (Exact Match)
+
+When `compare-fix-version` is provided without `fix-version-regex`, the action compares versions exactly as they appear in JIRA:
+
+```yml
+- uses: cakeinpanic/jira-description-action@master
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-base-url: https://your-domain.atlassian.net
+    compare-fix-version: '4.17.0'
+```
+
+**Behavior:**
+- ✅ JIRA fix version: `"4.17.0"` → **Match** (exact string match)
+- ❌ JIRA fix version: `"android 4.17.0"` → **No match** (different strings)
+- ❌ JIRA fix version: `"v4.17.0"` → **No match** (different strings)
+
+#### Advanced Usage (With Regex Extraction)
+
+If your JIRA fix versions include prefixes or additional text (like "android 4.17.0", "iOS 2.3.1"), use `fix-version-regex` to extract the version number:
+
+```yml
+- uses: cakeinpanic/jira-description-action@master
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-base-url: https://your-domain.atlassian.net
+    compare-fix-version: '4.17.0'
+    fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)'
+```
+
+**Behavior:**
+- ✅ JIRA fix version: `"android 4.17.0"` → Extracts `"4.17.0"` → **Match**
+- ✅ JIRA fix version: `"v4.17.0"` → Extracts `"4.17.0"` → **Match**
+- ✅ JIRA fix version: `"4.17.0"` → Extracts `"4.17.0"` → **Match**
+- ✅ JIRA fix version: `"iOS 4.17.0-beta"` → Extracts `"4.17.0-beta"` → **Match** (if comparing to "4.17.0-beta")
+
+**Important:** The regex pattern must include a **capturing group** (parentheses) to extract the version number.
+
+#### Custom Regex Examples
+
+For different JIRA version formats, customize the regex:
+
+**Format: "Release-4.17.0"**
+```yml
+fix-version-regex: 'Release-(\d+\.\d+\.\d+)'
+```
+
+**Format: "Sprint 42 - 4.17.0"**
+```yml
+fix-version-regex: 'Sprint \d+ - (\d+\.\d+\.\d+)'
+```
+
+**Format: "APP_VERSION_4.17.0"**
+```yml
+fix-version-regex: 'APP_VERSION_(\d+\.\d+\.\d+)'
+```
+
+**Format: "v4.17" (two-part versions)**
+```yml
+fix-version-regex: 'v(\d+\.\d+)'
+```
+
+#### What Happens on Mismatch
+
+When versions don't match:
+1. ❌ The action **fails** with a clear error message
+2. 💬 A **comment is added to the PR** explaining the mismatch
+3. 📋 The comment includes:
+   - Expected version (from repository)
+   - Actual JIRA fix version
+   - Extracted version (if regex was used)
+
+**Example PR Comment:**
+```
+⚠️ Fix Version Mismatch
+
+Version mismatch: Expected version `4.17.0` but JIRA ticket has fix version `android 4.18.0` (extracted: 4.18.0).
+
+Please update the JIRA ticket fix version to match the repository version or verify this is the correct version for this change.
+
+Expected: `4.17.0`
+JIRA Fix Version: `android 4.18.0`
+```
+
+#### Complete Example
+
+```yml
+name: jira-description-action
+on:
+  pull_request:
+    types: [opened, edited]
+jobs:
+  add-jira-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version from package.json
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - uses: cakeinpanic/jira-description-action@master
+        name: jira-description-action
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          jira-base-url: https://your-domain.atlassian.net
+          compare-fix-version: ${{ steps.package-version.outputs.version }}
+          fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)'
+```
+
+This example:
+1. Extracts the version from `package.json`
+2. Compares it with the JIRA ticket's fix version
+3. Uses regex to handle prefixed versions like "android 4.17.0"
+4. Fails the PR if versions don't match

@@ -34,6 +34,14 @@ inputs:
       description: 'Skip adding ticket title and formatted table, only add plain link to PR description'
       required: false
       default: 'false'
+  compare-fix-version:
+      description: 'Version from the repository to compare with the JIRA ticket fix version (e.g., "4.17.0"). If provided, the action will fail if versions do not match.'
+      required: false
+      default: ''
+  fix-version-regex:
+      description: 'Optional regex pattern to extract version from JIRA fix version field. Must include a capturing group. If not provided, versions are compared as-is (exact match). Example: "(?:^|[\\s\\-_])(v?\\d+\\.\\d+(?:\\.\\d+)?(?:[\\-\\+][\\w\\.\\-]*)?)" to extract "4.17.0" from "android 4.17.0"'
+      required: false
+      default: ''
 outputs:
   jira-issue-key:
     description: 'The JIRA issue key. If key is not found the value is an empty string'
