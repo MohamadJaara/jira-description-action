@@ -43,7 +43,7 @@ inputs:
     required: false
     default: ''
   fix-version-wildcards:
-    description: 'Comma-separated list of JIRA fix versions that should always be treated as a match (e.g., "Not applicable, N/A").'
+    description: 'Comma-separated list of JIRA fix versions that should always be treated as a match (e.g., "Not applicable, N/A"). Values are matched literally (case-insensitive).'
     required: false
     default: ''
 outputs:

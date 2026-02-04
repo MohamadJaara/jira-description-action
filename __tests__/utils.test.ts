@@ -261,6 +261,22 @@ describe('compareFixVersions() - Direct comparison without regex', () => {
     expect(result.jiraVersion).toEqual('4.17.0');
   });
 
+  it('should be case-sensitive for direct comparison', () => {
+    const jiraFixVersions = [{ name: 'Release-4.17.0', id: '1' }];
+    const result = compareFixVersions('release-4.17.0', jiraFixVersions);
+
+    expect(result.matches).toBe(false);
+    expect(result.extractedVersion).toEqual('Release-4.17.0');
+  });
+
+  it('should not trim whitespace for direct comparison', () => {
+    const jiraFixVersions = [{ name: '4.17.0 ', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions);
+
+    expect(result.matches).toBe(false);
+    expect(result.extractedVersion).toEqual('4.17.0 ');
+  });
+
   it('should NOT match when JIRA has "android 4.17.0" and expected is "4.17.0" (no regex)', () => {
     const jiraFixVersions = [{ name: 'android 4.17.0', id: '1' }];
     const result = compareFixVersions('4.17.0', jiraFixVersions);
@@ -356,12 +372,80 @@ describe('compareFixVersions() - Direct comparison without regex', () => {
     expect(result.extractedVersion).toEqual('Not Applicable');
   });
 
+  it('should not treat "*" as a wildcard pattern', () => {
+    const jiraFixVersions = [{ name: 'Release-4.17.0', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['release-*']);
+
+    expect(result.matches).toBe(false);
+    expect(result.jiraVersion).toEqual('Release-4.17.0');
+  });
+
+  it('should match wildcard fix version even when expected version has v prefix', () => {
+    const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
+    const result = compareFixVersions('v4.21.0', jiraFixVersions, undefined, ['Not applicable']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not applicable');
+  });
+
+  it('should match wildcard fix version even when custom regex is provided', () => {
+    const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
+    const result = compareFixVersions('4.21.0', jiraFixVersions, 'Release-(\\d+\\.\\d+\\.\\d+)', ['Not applicable']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not applicable');
+  });
+
+  it('should treat regex special characters in wildcard patterns as literals', () => {
+    const jiraFixVersions = [{ name: 'Release-4.17.0+build', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['Release-4.17.0+build']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Release-4.17.0+build');
+  });
+
+  it('should ignore empty wildcard entries and trim values', () => {
+    const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, [' ', 'Not applicable', '']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not applicable');
+  });
+
+  it('should match wildcard when it appears in later JIRA fix versions', () => {
+    const jiraFixVersions = [
+      { name: '4.17.0', id: '1' },
+      { name: 'Not applicable', id: '2' },
+    ];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['Not applicable']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not applicable');
+    expect(result.jiraVersion).toEqual('4.17.0, Not applicable');
+  });
+
   it('should not match when wildcard list does not include JIRA fix version', () => {
     const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
     const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['N/A']);
 
     expect(result.matches).toBe(false);
     expect(result.jiraVersion).toEqual('Not applicable');
+  });
+
+  it('should match literal "*" in wildcard list when JIRA version contains "*"', () => {
+    const jiraFixVersions = [{ name: 'Release-*', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['release-*']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Release-*');
+  });
+
+  it('should match literal "?" in wildcard list when JIRA version contains "?"', () => {
+    const jiraFixVersions = [{ name: 'R?.17.0', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['r?.17.0']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('R?.17.0');
   });
 });
 
