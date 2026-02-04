@@ -31,6 +31,7 @@ jobs:
           skip-ticket-title: false #optional
           compare-fix-version: '4.17.0' #optional
           fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)' #optional
+          fix-version-wildcards: 'Not applicable' #optional
 ```
 
 ## Options
@@ -48,6 +49,7 @@ jobs:
 | `skip-ticket-title` | Skip adding ticket title and formatted table, only add plain link to PR description  | false    | false     |
 | `compare-fix-version` | Version from the repository to compare with the JIRA ticket fix version (e.g., "4.17.0"). If provided, the action will fail if versions do not match. See [Version Comparison](#version-comparison) for details.  | false    | none     |
 | `fix-version-regex` | Optional regex pattern to extract version from JIRA fix version field. If not provided, versions are compared as-is (exact match). See [Version Comparison](#version-comparison) for details.  | false    | none     |
+| `fix-version-wildcards` | Comma-separated list of JIRA fix versions that should always be treated as a match (e.g., "Not applicable, N/A"). See [Version Comparison](#version-comparison) for details.  | false    | none     |
 
 ## Outputs
 
@@ -174,6 +176,13 @@ compare-fix-version: '4.17.0'  # Exact match: JIRA must be exactly "4.17.0"
 ```yml
 compare-fix-version: '4.17.0'
 fix-version-regex: '(?:^|[\s\-_])(v?\d+\.\d+(?:\.\d+)?(?:[\-\+][\w\.\-]*)?)'  # Extracts version from prefix
+```
+
+**Wildcard fix versions** (e.g., JIRA has "Not applicable"):
+
+```yml
+compare-fix-version: '4.17.0'
+fix-version-wildcards: 'Not applicable, N/A'
 ```
 
 **Example:** Compare against package.json version

@@ -42,6 +42,10 @@ inputs:
     description: 'Optional regex pattern to extract version from JIRA fix version field. Must include a capturing group. If not provided, versions are compared as-is (exact match). Example: "(?:^|[\\s\\-_])(v?\\d+\\.\\d+(?:\\.\\d+)?(?:[\\-\\+][\\w\\.\\-]*)?)" to extract "4.17.0" from "android 4.17.0"'
     required: false
     default: ''
+  fix-version-wildcards:
+    description: 'Comma-separated list of JIRA fix versions that should always be treated as a match (e.g., "Not applicable, N/A").'
+    required: false
+    default: ''
 outputs:
   jira-issue-key:
     description: 'The JIRA issue key. If key is not found the value is an empty string'

@@ -107,6 +107,7 @@ export interface IActionInputs {
   SKIP_TICKET_TITLE: boolean;
   COMPARE_FIX_VERSION: string;
   FIX_VERSION_REGEX: string;
+  FIX_VERSION_WILDCARDS: string[];
 }
 
 export interface IGithubData {

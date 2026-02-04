@@ -6,7 +6,7 @@ import { GithubConnector } from './github-connector';
 import { JiraConnector } from './jira-connector';
 
 async function run(): Promise<void> {
-  const { FAIL_WHEN_JIRA_ISSUE_NOT_FOUND, SKIP_TICKET_TITLE, COMPARE_FIX_VERSION, FIX_VERSION_REGEX } = getInputs();
+  const { FAIL_WHEN_JIRA_ISSUE_NOT_FOUND, SKIP_TICKET_TITLE, COMPARE_FIX_VERSION, FIX_VERSION_REGEX, FIX_VERSION_WILDCARDS } = getInputs();
 
   try {
     const { BRANCH_IGNORE_PATTERN } = getInputs();
@@ -33,7 +33,12 @@ async function run(): Promise<void> {
     // Compare fix versions if COMPARE_FIX_VERSION is provided
     if (COMPARE_FIX_VERSION) {
       console.log(`Comparing fix version: expected ${COMPARE_FIX_VERSION}`);
-      const { matches, jiraVersion, extractedVersion } = compareFixVersions(COMPARE_FIX_VERSION, details.fixVersions, FIX_VERSION_REGEX || undefined);
+      const { matches, jiraVersion, extractedVersion } = compareFixVersions(
+        COMPARE_FIX_VERSION,
+        details.fixVersions,
+        FIX_VERSION_REGEX || undefined,
+        FIX_VERSION_WILDCARDS
+      );
 
       if (!matches) {
         const errorMessage = jiraVersion

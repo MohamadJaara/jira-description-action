@@ -112,12 +112,14 @@ export const extractVersionFromString = (versionString: string, customRegex?: st
  * @param expectedVersion - The expected version from the repository
  * @param jiraFixVersions - Array of fix versions from JIRA ticket
  * @param customRegex - Optional custom regex pattern for version extraction. If not provided, compares directly without extraction.
+ * @param wildcardFixVersions - Optional list of JIRA fix versions that should always be treated as a match.
  * @returns Object with match status and extracted JIRA version
  */
 export const compareFixVersions = (
   expectedVersion: string,
   jiraFixVersions?: Array<{ name: string; id: string }>,
-  customRegex?: string
+  customRegex?: string,
+  wildcardFixVersions?: string[]
 ): { matches: boolean; jiraVersion: string | null; extractedVersion: string | null } => {
   if (!jiraFixVersions || jiraFixVersions.length === 0) {
     console.log('No fix versions found in JIRA ticket');
@@ -127,6 +129,18 @@ export const compareFixVersions = (
   // Get the first fix version (or combine if multiple)
   const jiraVersionString = jiraFixVersions.map((v) => v.name).join(', ');
   console.log(`JIRA fix version(s): ${jiraVersionString}`);
+
+  const normalizeFixVersion = (value: string): string => value.trim().toLowerCase();
+  const wildcardSet = new Set((wildcardFixVersions || []).map(normalizeFixVersion).filter(Boolean));
+
+  if (wildcardSet.size > 0) {
+    for (const fixVersion of jiraFixVersions) {
+      if (wildcardSet.has(normalizeFixVersion(fixVersion.name))) {
+        console.log(`✓ Wildcard fix version matched: ${fixVersion.name}`);
+        return { matches: true, jiraVersion: jiraVersionString, extractedVersion: fixVersion.name };
+      }
+    }
+  }
 
   // If no custom regex provided, compare as-is (direct string comparison)
   if (!customRegex) {

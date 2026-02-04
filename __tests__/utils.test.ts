@@ -338,6 +338,31 @@ describe('compareFixVersions() - Direct comparison without regex', () => {
     expect(result.extractedVersion).toEqual(null);
     expect(result.jiraVersion).toEqual(null);
   });
+
+  it('should match when a wildcard fix version is present', () => {
+    const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['Not applicable']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not applicable');
+    expect(result.jiraVersion).toEqual('Not applicable');
+  });
+
+  it('should match wildcard fix version case-insensitively', () => {
+    const jiraFixVersions = [{ name: 'Not Applicable', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['not applicable']);
+
+    expect(result.matches).toBe(true);
+    expect(result.extractedVersion).toEqual('Not Applicable');
+  });
+
+  it('should not match when wildcard list does not include JIRA fix version', () => {
+    const jiraFixVersions = [{ name: 'Not applicable', id: '1' }];
+    const result = compareFixVersions('4.17.0', jiraFixVersions, undefined, ['N/A']);
+
+    expect(result.matches).toBe(false);
+    expect(result.jiraVersion).toEqual('Not applicable');
+  });
 });
 
 describe('compareFixVersions() - With default regex', () => {
