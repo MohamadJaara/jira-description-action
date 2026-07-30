@@ -1,7 +1,6 @@
 import { getOctokit } from '@actions/github';
 import { GithubConnector } from '../src/github-connector';
 import { ESource, IActionInputs } from '../src/types';
-import { describe } from 'jest-circus';
 import { getJIRAIssueKeyByDefaultRegexp, getJIRAIssueKeysByCustomRegexp } from '../src/utils';
 import { getInputs } from '../src/action-inputs';
 

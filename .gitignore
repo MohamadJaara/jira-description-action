@@ -8,6 +8,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 node_modules
+.build
 
 # IDE code custom settings
 .vscode

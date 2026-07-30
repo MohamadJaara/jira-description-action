@@ -64,11 +64,12 @@ async function run(): Promise<void> {
 
     setOutputs(key, source);
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.log('Failed to add JIRA description to PR.');
-    core.error(error.message);
+    core.error(errorMessage);
     setOutputs(null, null);
     if (FAIL_WHEN_JIRA_ISSUE_NOT_FOUND) {
-      core.setFailed(error.message);
+      core.setFailed(errorMessage);
       process.exit(1);
     } else {
       process.exit(0);

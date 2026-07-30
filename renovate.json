@@ -14,19 +14,16 @@
       ]
     },
     {
-      "groupName": "Jest and TypeScript toolchain",
-      "groupSlug": "jest-typescript-toolchain",
+      "groupName": "Jest toolchain",
+      "groupSlug": "jest-toolchain",
       "matchPackageNames": [
         "jest",
-        "jest-circus",
-        "ts-jest",
         "@types/jest",
-        "typescript"
+        "babel-jest",
+        "@babel/core",
+        "@babel/preset-env",
+        "@babel/preset-typescript"
       ]
-    },
-    {
-      "matchPackageNames": ["typescript"],
-      "allowedVersions": "<6"
     }
   ]
 }

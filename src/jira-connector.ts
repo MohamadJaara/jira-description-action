@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { getInputs } from './action-inputs';
 import { JIRA, JIRADetails } from './types';
 
@@ -50,7 +50,7 @@ export class JiraConnector {
       console.log(
         'Error fetching details from JIRA. Please check if token you provide is built correctly & API key has all needed permissions. https://github.com/cakeinpanic/jira-description-action#jira-token'
       );
-      if (error.response) {
+      if (isAxiosError(error) && error.response) {
         throw new Error(JSON.stringify(error.response.data, null, 4));
       }
       throw error;
@@ -62,4 +62,8 @@ export class JiraConnector {
     const response = await this.client.get<JIRA.Issue>(url);
     return response.data;
   }
+}
+
+function isAxiosError(error: unknown): error is AxiosError {
+  return error instanceof Error && 'isAxiosError' in error;
 }
