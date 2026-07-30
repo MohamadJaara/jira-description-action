@@ -3,5 +3,30 @@
   "extends": ["config:recommended"],
   "minimumReleaseAge": "14 days",
   "prCreation": "not-pending",
-  "internalChecksFilter": "strict"
+  "internalChecksFilter": "strict",
+  "packageRules": [
+    {
+      "groupName": "release-it toolchain",
+      "groupSlug": "release-it-toolchain",
+      "matchPackageNames": [
+        "release-it",
+        "@release-it/conventional-changelog"
+      ]
+    },
+    {
+      "groupName": "Jest and TypeScript toolchain",
+      "groupSlug": "jest-typescript-toolchain",
+      "matchPackageNames": [
+        "jest",
+        "jest-circus",
+        "ts-jest",
+        "@types/jest",
+        "typescript"
+      ]
+    },
+    {
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<6"
+    }
+  ]
 }
