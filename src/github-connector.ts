@@ -1,13 +1,13 @@
 import { context, getOctokit } from '@actions/github';
-import { GitHub } from '@actions/github/lib/utils';
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
 import { getInputs } from './action-inputs';
 import { ESource, IGithubData, JIRADetails, PullRequestParams } from './types';
 import { buildPRDescription, getJIRAIssueKeyByDefaultRegexp, getJIRAIssueKeysByCustomRegexp, getPRDescription } from './utils';
 
+type Octokit = ReturnType<typeof getOctokit>;
+
 export class GithubConnector {
   githubData: IGithubData = {} as IGithubData;
-  octokit: InstanceType<typeof GitHub>;
+  octokit: Octokit;
 
   constructor() {
     const { GITHUB_TOKEN } = getInputs();
@@ -80,7 +80,7 @@ export class GithubConnector {
     const { number: prNumber = 0 } = this.githubData.pullRequest;
     const recentBody = await this.getLatestPRDescription({ repo, owner, number: this.githubData.pullRequest.number });
 
-    const prData: RestEndpointMethodTypes['pulls']['update']['parameters'] = {
+    const prData: Parameters<Octokit['rest']['pulls']['update']>[0] = {
       owner,
       repo,
       pull_number: prNumber,
@@ -98,7 +98,7 @@ export class GithubConnector {
         repo,
         pull_number: number,
       })
-      .then(({ data }: RestEndpointMethodTypes['pulls']['get']['response']) => {
+      .then(({ data }) => {
         return data.body || '';
       });
   }
