@@ -54,7 +54,7 @@
     "release-it": "^16.2.1",
     "ts-jest": "^25.5.1",
     "typescript": "^3.9.7",
-    "@release-it/conventional-changelog": "^7.0.2"
+    "@release-it/conventional-changelog": "^11.0.0"
   },
   "devDependencies": {
     "husky": "^4.3.0",
