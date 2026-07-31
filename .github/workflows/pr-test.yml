@@ -59,7 +59,7 @@ jobs:
           cache: npm
 
       - name: "install"
-        run: npm ci --production
+        run: npm ci
 
       - name: "test"
         run: npm run test
