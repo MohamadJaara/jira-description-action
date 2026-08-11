@@ -41,7 +41,7 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3.0.0",
     "@actions/github": "^6.0.1",
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
