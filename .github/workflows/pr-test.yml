@@ -59,7 +59,10 @@ jobs:
           cache: npm
 
       - name: "install"
-        run: npm ci
+        # Jest's Babel 7 syntax plugins must resolve separately from Babel 8.
+        run: |
+          npm ci --strict-peer-deps
+          npm ls @babel/core --all
 
       - name: "test"
         run: npm run test
