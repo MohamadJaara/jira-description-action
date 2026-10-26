@@ -26,7 +26,7 @@ jest.mock('@actions/github', () => {
   };
 });
 
-jest.mock('../src/action-inputs');
+jest.mock('../src/action-inputs', () => ({ getInputs: jest.fn() }));
 jest.mock('../src/utils');
 
 describe('Github connector()', () => {
