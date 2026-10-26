@@ -2,6 +2,7 @@ module.exports = {
   clearMocks: true,
   moduleFileExtensions: ['js', 'ts'],
   testEnvironment: 'node',
+  resolver: './jest-resolver.cjs',
   testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.ts$': [
