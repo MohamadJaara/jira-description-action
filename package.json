@@ -48,7 +48,7 @@
     "@babel/preset-typescript": "^8.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.13.3",
-    "@vercel/ncc": "^0.44.1",
+    "@vercel/ncc": "^0.45.0",
     "axios": "^1.19.0",
     "babel-jest": "^30.4.1",
     "engines-ok": "^1.2.0",
